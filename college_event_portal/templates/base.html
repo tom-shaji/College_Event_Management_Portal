@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Event Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="toast-container">
+        {% for category, message in messages %}
+          <div class="toast {{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+              <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if session.get('user_id') %}
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">C</div>
+                <div class="logo-text">College Portal</div>
+            </div>
+            
+            <ul class="nav-links">
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_dashboard' else '' }}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('admin_registrations') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_registrations' else '' }}"><i class="fas fa-users"></i> Registrations</a></li>
+                {% else %}
+                <li><a href="{{ url_for('student_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'student_dashboard' else '' }}"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('events') }}" class="nav-item {{ 'active' if 'event' in request.endpoint else '' }}"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                <li><a href="{{ url_for('my_registrations') }}" class="nav-item {{ 'active' if request.endpoint == 'my_registrations' else '' }}"><i class="fas fa-ticket-alt"></i> My Registrations</a></li>
+                <li><a href="{{ url_for('profile') }}" class="nav-item {{ 'active' if request.endpoint == 'profile' else '' }}"><i class="fas fa-user"></i> Profile</a></li>
+                {% endif %}
+            </ul>
+            
+            <div class="user-profile-sm">
+                <div class="avatar">{{ session.get('name')[0] }}</div>
+                <div class="user-info">
+                    <span class="user-name">{{ session.get('name') }}</span>
+                    <span class="user-role">{{ session.get('role') }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn-outline" style="margin-left: auto; padding: 0.25rem 0.5rem; border:none; color: var(--danger);" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+        {% block login_content %}{% endblock %}
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block login_content %}
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo-icon">C</div>
+            <h2>Welcome Back</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Sign in to your college event portal</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required placeholder="student@college.edu" value="student@college.edu">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••" value="student123">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.875rem;">Sign In <i class="fas fa-arrow-right"></i></button>
+            <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">Demo Admin: admin@college.edu / admin123</p>
+        </form>
+    </div>
+</div>
+{% endblock %}

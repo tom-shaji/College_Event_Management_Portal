@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">All Registrations</h1>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" action="{{ url_for('admin_registrations') }}" style="display: flex; gap: 1rem; width: 100%;">
+        <input type="text" name="search" class="form-control search-input" placeholder="Search by student name, ID, or event..." value="{{ search }}">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+        {% if search %}
+        <a href="{{ url_for('admin_registrations') }}" class="btn btn-outline"><i class="fas fa-times"></i> Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Reg ID</th>
+                <th>Student Details</th>
+                <th>Event</th>
+                <th>Date Registered</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reg in registrations %}
+            <tr>
+                <td style="font-family: monospace; font-weight: 600;">#{{ '%04d' % reg.id }}</td>
+                <td>
+                    <div style="font-weight: 600;">{{ reg.student_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">ID: {{ reg.student_id }}</div>
+                </td>
+                <td style="font-weight: 500;">{{ reg.event_name }}</td>
+                <td>{{ reg.reg_date[:10] }}</td>
+                <td>
+                    {% if reg.status == 'Registered' %}
+                    <span class="badge badge-success">Registered</span>
+                    {% else %}
+                    <span class="badge badge-danger">Cancelled</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">No registrations found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

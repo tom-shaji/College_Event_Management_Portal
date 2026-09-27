@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Browse Events</h1>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" action="{{ url_for('events') }}" style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+        <input type="text" name="search" class="form-control search-input" placeholder="Search events..." value="{{ search }}">
+        
+        <select name="category" class="form-control" style="width: auto; min-width: 150px;">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if current_cat == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        
+        <input type="date" name="date" class="form-control" style="width: auto;" value="{{ current_date }}">
+        
+        <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
+        {% if search or current_cat or current_date %}
+        <a href="{{ url_for('events') }}" class="btn btn-outline"><i class="fas fa-times"></i> Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if events %}
+<div class="events-grid">
+    {% for event in events %}
+    <div class="event-card">
+        <div class="event-banner">
+            <span class="event-category-badge">{{ event.category }}</span>
+        </div>
+        <div class="event-body">
+            <h3 class="event-title">{{ event.name }}</h3>
+            <p class="event-desc">{{ event.description }}</p>
+            
+            <div class="event-meta">
+                <div class="event-meta-item">
+                    <i class="far fa-calendar-alt"></i> {{ event.date }} at {{ event.time }}
+                </div>
+                <div class="event-meta-item">
+                    <i class="fas fa-map-marker-alt"></i> {{ event.venue }}
+                </div>
+            </div>
+            
+            <div class="event-footer">
+                <div class="seats-info {% if event.available_seats == 0 %}seats-low{% elif event.available_seats < 20 %}seats-warning{% else %}seats-good{% endif %}">
+                    {% if event.available_seats == 0 %}
+                    Sold Out
+                    {% else %}
+                    {{ event.available_seats }} seats left
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-secondary">Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="background: white; padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px dashed var(--border);">
+    <i class="far fa-frown" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+    <p style="color: var(--text-muted);">No events found matching your criteria.</p>
+</div>
+{% endif %}
+{% endblock %}

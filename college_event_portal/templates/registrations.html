@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">My Registrations</h1>
+</div>
+
+{% if registrations %}
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Reg ID</th>
+                <th>Event Name</th>
+                <th>Date & Venue</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reg in registrations %}
+            <tr>
+                <td style="font-family: monospace; font-weight: 600;">#{{ '%04d' % reg.id }}</td>
+                <td style="font-weight: 600;">{{ reg.name }}</td>
+                <td>
+                    <div style="font-weight: 500;">{{ reg.date }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ reg.venue }}</div>
+                </td>
+                <td>
+                    {% if reg.status == 'Registered' %}
+                    <span class="badge badge-success">Registered</span>
+                    {% else %}
+                    <span class="badge badge-danger">Cancelled</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="{{ url_for('event_details', event_id=reg.event_id) }}" class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">View Event</a>
+                        {% if reg.status == 'Registered' %}
+                        <form action="{{ url_for('cancel_registration', reg_id=reg.id) }}" method="POST" class="confirm-form" data-confirm-msg="Are you sure you want to cancel your registration for {{ reg.name }}?">
+                            <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">Cancel</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div style="background: white; padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px dashed var(--border);">
+    <i class="fas fa-ticket-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+    <p style="color: var(--text-muted);">You have no registrations.</p>
+    <a href="{{ url_for('events') }}" class="btn btn-primary" style="margin-top: 1rem;">Browse Events</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Admin Dashboard</h1>
+    <button class="btn btn-primary" data-modal-target="addModal"><i class="fas fa-plus"></i> Add Event</button>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-title">Total Events</div>
+        <div class="stat-value">{{ stats.total_events }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Upcoming</div>
+        <div class="stat-value">{{ stats.upcoming_events }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Total Registrations</div>
+        <div class="stat-value">{{ stats.total_regs }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Students</div>
+        <div class="stat-value">{{ stats.total_students }}</div>
+    </div>
+</div>
+
+<h2 style="margin-bottom: 1rem; font-size: 1.25rem;">Manage Events</h2>
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Date & Time</th>
+                <th>Registrations / Seats</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td style="font-weight: 600;">{{ event.name }}</td>
+                <td>{{ event.date }} <br><span style="font-size: 0.75rem; color: var(--text-muted);">{{ event.time }}</span></td>
+                <td>
+                    <div style="font-weight: 600;">{{ event.reg_count }} / {{ event.total_seats }}</div>
+                    <div style="width: 100px; height: 4px; background: var(--bg-main); border-radius: 2px; margin-top: 0.25rem;">
+                        {% set percent = (event.reg_count / event.total_seats) * 100 %}
+                        <div style="height: 100%; background: var(--primary); width: {{ percent }}%;"></div>
+                    </div>
+                </td>
+                <td>
+                    {% if event.date >= '2024-01-01' %} 
+                    <span class="badge badge-success">Upcoming</span>
+                    {% else %}
+                    <span class="badge badge-info">Completed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" onclick='openEditModal({{ dict(event)|tojson }})'><i class="fas fa-edit"></i></button>
+                        <form action="{{ url_for('delete_event', event_id=event.id) }}" method="POST" class="confirm-form" data-confirm-msg="Delete event {{ event.name }}? This will also delete all registrations.">
+                            <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem;"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Event Modal -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Event</h2>
+            <button class="close-modal" data-close-modal>&times;</button>
+        </div>
+        <form action="{{ url_for('add_event') }}" method="POST">
+            <div class="form-group"><label class="form-label">Name</label><input type="text" name="name" class="form-control" required></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label class="form-label">Date</label><input type="date" name="date" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Time</label><input type="time" name="time" class="form-control" required></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label class="form-label">Venue</label><input type="text" name="venue" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Category</label><input type="text" name="category" class="form-control" required placeholder="e.g. Technical"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Organizer</label><input type="text" name="organizer" class="form-control" required></div>
+            <div class="form-group"><label class="form-label">Total Seats</label><input type="number" name="total_seats" class="form-control" required min="1"></div>
+            <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-control" required rows="3"></textarea></div>
+            <div class="form-group"><label class="form-label">Rules (Optional)</label><textarea name="rules" class="form-control" rows="2"></textarea></div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                <button type="button" class="btn btn-outline" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Event</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Event Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Event</h2>
+            <button class="close-modal" data-close-modal>&times;</button>
+        </div>
+        <form id="editForm" method="POST">
+            <div class="form-group"><label class="form-label">Name</label><input type="text" id="edit_name" name="name" class="form-control" required></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label class="form-label">Date</label><input type="date" id="edit_date" name="date" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Time</label><input type="time" id="edit_time" name="time" class="form-control" required></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label class="form-label">Venue</label><input type="text" id="edit_venue" name="venue" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Category</label><input type="text" id="edit_category" name="category" class="form-control" required></div>
+            </div>
+            <div class="form-group"><label class="form-label">Organizer</label><input type="text" id="edit_organizer" name="organizer" class="form-control" required></div>
+            <div class="form-group"><label class="form-label">Total Seats</label><input type="number" id="edit_total_seats" name="total_seats" class="form-control" required min="1"></div>
+            <div class="form-group"><label class="form-label">Description</label><textarea id="edit_description" name="description" class="form-control" required rows="3"></textarea></div>
+            <div class="form-group"><label class="form-label">Rules (Optional)</label><textarea id="edit_rules" name="rules" class="form-control" rows="2"></textarea></div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                <button type="button" class="btn btn-outline" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
